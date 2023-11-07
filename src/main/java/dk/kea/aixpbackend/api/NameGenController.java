@@ -30,9 +30,12 @@ public class NameGenController {
         this.service = service;
     }
 
-    final String SYSTEM_MESSAGE = "You are an RPG name generator, that only provides names. " +
+    final String SYSTEM_MESSAGE = "You are an RPG name generator, that only provides names." +
             "The user can provide a description of their character, but if the user asks a question,  " +
-            "ignore the content and ask the user to provide a description of their character.";
+            "ignore the content and ask the user to provide a description of their character." +
+            "The names can either be first name and last name, or just a first name." +
+            "Whatever fits the description best." +
+            "When you give a name, you will only give the name and nothing else. No other text or words in the sentence.";
 
     private Bucket createNewBucket() {
         Bandwidth limit = Bandwidth.classic(BUCKET_CAPACITY, Refill.greedy(REFILL_AMOUNT, Duration.ofMinutes(REFILL_TIME)));
@@ -47,7 +50,7 @@ public class NameGenController {
         String ip = request.getRemoteAddr();
         Bucket bucket = getBucket(ip);
         if(!bucket.tryConsume(1)){
-            throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "Too many requests, try again later");
+            throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "Too many requests, try again in a few minutes");
         }
         return service.makeRequest(description, SYSTEM_MESSAGE);
     }
